@@ -29,7 +29,7 @@ export function ScorePractice({ lesson, mode, audio, onDone, onQuiz }) {
   const end = range < 0 ? notes.length : first + 4;
   const measure = Math.floor((playing >= 0 ? playing : index) / 4);
   const current = notes[index];
-  const correct = PITCHES[current].positions.includes(position);
+  const correct = position !== null && PITCHES[current].positions.some(target => Math.abs(target - position) <= 0.22);
 
   useEffect(
     () => () => {
@@ -84,7 +84,8 @@ export function ScorePractice({ lesson, mode, audio, onDone, onQuiz }) {
   function choosePosition(next) {
     if (playing >= 0) return;
     setPosition(next);
-    if (PITCHES[current].positions.includes(next)) audio.play(PITCHES[current].midi);
+    const target = PITCHES[current].positions.reduce((best, candidate) => Math.abs(candidate - next) < Math.abs(best - next) ? candidate : best);
+    audio.play(PITCHES[current].midi + target - next);
   }
 
   function advance() {
@@ -161,7 +162,7 @@ export function ScorePractice({ lesson, mode, audio, onDone, onQuiz }) {
               {playing >= 0
                 ? 'Listen to the phrase, then try it on the slide.'
                 : position === null
-                  ? 'Choose a slide position.'
+                  ? 'Drag the slide into position.'
                   : correct
                     ? 'Correct · ' + PITCHES[current].positions.join(' or ')
                     : 'Try another position.'}
@@ -307,7 +308,7 @@ export function Flashcards({ audio, onDone, best }) {
   function choose(position) {
     if (mode === 'sprint' && (!running || performance.now() - begin.current >= 30000)) return;
     const pitch = PITCHES[note];
-    if (!pitch.positions.includes(position)) {
+    if (!pitch.positions.some(target => Math.abs(target - position) <= 0.22)) {
       setFeedback('Try another position.');
       return;
     }
@@ -531,9 +532,9 @@ export function Freeplay({ audio }) {
     <>
       <Heading title="Freeplay" subtitle="Choose a partial and move the virtual slide." />
       <View style={[s.card, s.hero]}>
-        <Text style={s.heroTitle}>{pitchName(midi)}</Text>
+        <Text style={s.heroTitle}>{pitchName(Math.round(midi))}</Text>
         <Text style={s.body}>
-          Partial {partial + 2} · Position {position}
+          Partial {partial + 2} · Position {position.toFixed(2)}
         </Text>
         <View style={s.row}>
           {PARTIALS.map((base, i) => (

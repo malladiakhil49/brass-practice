@@ -111,10 +111,10 @@ export const s = StyleSheet.create({
   measure: {
     flexDirection: 'row',
     position: 'relative',
-    height: 112,
-    backgroundColor: '#fffdf6',
+    height: 132,
+    backgroundColor: '#f2f6fc',
     borderWidth: 1,
-    borderColor: '#e8e2cf',
+    borderColor: '#dce5f0',
     borderRadius: 10,
     paddingHorizontal: 6,
   },
@@ -128,7 +128,7 @@ export const s = StyleSheet.create({
     left: 0,
     right: 0,
     borderRadius: 6,
-    backgroundColor: '#ffe89d',
+    backgroundColor: '#bfdbfe',
   },
   noteHead: {
     position: 'absolute',
@@ -172,7 +172,7 @@ export const s = StyleSheet.create({
   beatActive: { borderWidth: 2, borderColor: '#b07e00' },
   input: {
     color: '#252b22',
-    backgroundColor: '#fffdf6',
+    backgroundColor: '#f2f6fc',
     borderWidth: 1,
     borderColor: '#deddd2',
     borderRadius: 10,

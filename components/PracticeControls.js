@@ -1,3 +1,4 @@
+import { useRef, useState } from 'react';
 import { Pressable, Text, View } from 'react-native';
 import { PITCHES } from '../lessons';
 import { s } from '../theme';
@@ -94,18 +95,42 @@ export function Measure({ notes, active = -1, names = false }) {
 }
 
 export function PositionRail({ value, onPress }) {
+  const [width, setWidth] = useState(1);
+  const [local, setLocal] = useState(1);
+  const track = useRef(null);
+  const origin = useRef(0);
+  const position = value ?? local;
+  function move(event) {
+    const next = Math.max(1, Math.min(7, 1 + (event.nativeEvent.pageX - origin.current - 18) / Math.max(1, width - 36) * 6));
+    setLocal(next);
+    onPress(next);
+  }
   return (
-    <View style={s.rail}>
-      {positions.map((position) => (
-        <Button
-          key={position}
-          label={String(position)}
-          accessibilityLabel={'Slide position ' + position}
-          selected={position === value}
-          style={s.railButton}
-          onPress={() => onPress(position)}
-        />
-      ))}
+    <View>
+      <View ref={track} onLayout={event => setWidth(event.nativeEvent.layout.width)}
+        accessibilityRole="adjustable" accessibilityLabel="Trombone slide"
+        accessibilityValue={{ min: 1, max: 7, now: position }}
+        accessibilityActions={[{ name: 'increment' }, { name: 'decrement' }]}
+        onAccessibilityAction={event => {
+          const next = Math.max(1, Math.min(7, position + (event.nativeEvent.actionName === 'increment' ? 0.1 : -0.1)));
+          setLocal(next);
+          onPress(next);
+        }}
+        onStartShouldSetResponder={() => true}
+        onMoveShouldSetResponder={() => true}
+        onResponderGrant={event => {
+          const pageX = event.nativeEvent.pageX;
+          track.current.measureInWindow(x => {
+            origin.current = x;
+            move({ nativeEvent: { pageX } });
+          });
+        }}
+        onResponderMove={move}
+        style={{ height: 72, justifyContent: 'center', backgroundColor: '#e7edf5', borderRadius: 16 }}>
+        <View pointerEvents="none" style={{ height: 6, marginHorizontal: 18, borderRadius: 3, backgroundColor: '#b4c5d9' }} />
+        <View pointerEvents="none" style={{ position: 'absolute', left: 18 + (position - 1) / 6 * (width - 36) - 16, width: 32, height: 48, borderRadius: 12, backgroundColor: '#2563eb' }} />
+      </View>
+      <Text style={s.small}>Drag to move · Position {position.toFixed(2)}</Text>
     </View>
   );
 }

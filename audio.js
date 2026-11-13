@@ -18,14 +18,18 @@ export function usePracticeAudio() {
   }, []);
 
   async function play(midi) {
+    if (!Number.isFinite(midi)) return;
+    const note = Math.max(28, Math.min(88, Math.round(midi)));
     const version = ++revision.current;
     try {
       current.current?.pause();
-      if (!players.current.has(midi)) {
-        players.current.set(midi, createAudioPlayer(tones[midi]));
+      if (!players.current.has(note)) {
+        players.current.set(note, createAudioPlayer(tones[note]));
       }
-      const player = players.current.get(midi);
+      const player = players.current.get(note);
       current.current = player;
+      player.shouldCorrectPitch = false;
+      player.setPlaybackRate(2 ** ((midi - note) / 12));
       await player.seekTo(0);
       if (version === revision.current) player.play();
     } catch {
